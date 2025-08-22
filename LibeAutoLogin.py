@@ -1,45 +1,66 @@
-from selenium import webdriver
-from selenium.webdriver.common.by import By # 要素を指定するためのコード Byをインポートする
-from selenium.webdriver.support.ui import WebDriverWait #指定したい要素が表示されるまで待つコード
-from selenium.webdriver.support import expected_conditions as EC #指定したい要素が表示されるまで待つコード
-from selenium.webdriver.chrome.service import Service
-from webdriver_manager.chrome import ChromeDriverManager
-import time
-from dotenv import load_dotenv # .envファイルを読み込む準備
-import os
+from selenium.webdriver.common.by import By # 要素を指定するためのByを使えるようにする
+import time                                 # 時間を扱うためのライブラリ（機能が詰まった道具箱）を使えるようにする
+from dotenv import load_dotenv              # .envファイルを読み込む準備
+import os                                   # OS(オペレーティングシステム(Windouws))の機能と対話するためのライブラリを使えるようにする
+from selenium_driver import SeleniumDriver  # 作成したselenium_driver.pyをインポートする
 
 # .envファイル（環境変数）の読み込み
-load_dotenv()
-login_addles = os.getenv("LOGIN_ADDLES")
-login_password = os.getenv("LOGIN_PASSWORD")
+load_dotenv()                               # os.getenv=指定された名前の環境変数の値を取得する
 
-# chromeを自動で起動
-driver = webdriver.Chrome(service=Service(ChromeDriverManager().install())) #driverはブラウザを扱えるように接続してくれるもの
+# os.getenvで指定した名前の環境変数の値を取得
+LOGIN_ADDLES = os.getenv("LOGIN_ADDLES")
+LOGIN_PASSWORD = os.getenv("LOGIN_PASSWORD")
 
-# 任意のページを開く（リベシティのログイン画面）
-driver.get("https://libecity.com/signin") #getメソッド+（）開きたいページのURLを引数に指定する
-wait = WebDriverWait(driver, 10) #ページが開くまで10秒待機
+# 定数定義(プログラム中に変更しない値)
+BASE_URL = "https://libecity.com/signin"                                  # この部分はプログラムの実行中に値が変わることが意図されていないもの
+MAIL_INPUT_LOCATOR = (By.XPATH, '//input[@placeholder="メールアドレス"]')  # pythonでは「定数」として扱われる
+PASS_INPUT_LOCATOR = (By.XPATH, '//input[@placeholder="パスワード"]')      # pythonの定数は全て大文字のスネークケースで命名する
+LOGIN_BUTTON_LOCATOR = (By.CSS_SELECTOR, "#contents_wrap > main > div.login_tab_box.is_show > section > p.form_data_area.text-center > button")
+HOME_BUTTON_LOCATOR = (By.XPATH, '//*[@id="tool_bar"]/div[1]/ul/li[1]/a') # 大文字で書くことで可読性を向上させ、定数と示すことで意図しない変更を防ぐ
 
-# メールアドレスの自動入力
-mail_element = wait.until(EC.visibility_of_element_located((By.XPATH, '//input[@placeholder="メールアドレス"]'))) #メールアドレスの入力欄がブラウザに表示されるのを待つ、かつ、表示されたブラウザからplaceholderがメールアドレスである入力欄を探す
-mail_element.send_keys(login_addles) #探した入力欄に環境変数を自動入力する
+# メインの処理
+def main():
+    """ 指定したURLに自動でログインし、10秒後にブラウザを閉じるメイン処理"""
+    # SeleniumDriverクラスのインスタンスを作成
+    # これにより、__init__メソッドが呼び出され、chromeブラウザが起動
+    # browserはインスタンス変数、この変数をtry以下のコードの中で使用
+    browser = SeleniumDriver(timeout=10)  
+                                    
+    # try...except...finally構文
+    # try=実行
+    try:
+        # 1. ページを開く
+        browser.open_page(BASE_URL)
 
-# パスワードの自動入力
-pass_element = wait.until(EC.visibility_of_element_located((By.XPATH, '//input[@placeholder="パスワード"]'))) # 指定した要素が表示されるまで待機、かつ、要素を指定して変数に代入
-pass_element.send_keys(login_password)
+        # 2. メールアドレスとパスワードの入力
+        browser.input_text(MAIL_INPUT_LOCATOR, LOGIN_ADDLES)
+        browser.input_text(PASS_INPUT_LOCATOR, LOGIN_PASSWORD)
+        
+        # 3. ログインボタンをクリック
+        browser.click_element(LOGIN_BUTTON_LOCATOR)
+        
+        # 4. ログイン後のページ表示まで待機,ログインが成功する場合、ホームボタンがブラウザに表示される
+        browser.wait_for_element_visibility(HOME_BUTTON_LOCATOR)
+        
+        # 5. ログイン後のブラウザを目視で確認するための待機時間
+        time.sleep(10)
+        
+    except Exception as e:
+        # tryブロック内でエラーが発生した場合、実行されるブロック
+        print(f"エラーが発生しました: {e}")
+    finally:         
+        # try実行の成否に関わらず実行されるブロック
+        # ブラウザを閉じる
+        browser.quit()
 
-# ログインボタンのクリック
-login_button = driver.find_element(By.CSS_SELECTOR, "#contents_wrap > main > div.login_tab_box.is_show > section > p.form_data_area.text-center > button")
-login_button.click()
+# このスクリプトが直接実行された場合にmain()関数を呼び出す
+# ターミナルで python LibeAutoLogin.pyとコマンド入力して実行＝直接実行
+# 直接実行することで__name__ = "__main__"となる
+# if __name__ = "__main__"が「真」となり、main()が実行される
+# これにより、他のファイルからモジュールとしてインポートされた場合はmain()は自動実行されない
+if __name__ == "__main__": 
+    main()
 
-# ログイン後の確認のための待機時間
-wait.until(EC.visibility_of_element_located((By.XPATH, '//*[@id="tool_bar"]/div[1]/ul/li[1]/a')))
-
-# ログイン後の画面を目視で確認するための待機時間
-time.sleep(10)
-
-#アプリの終了（直前で設定した待機時間経過後）
-driver.quit()
 
 
 
