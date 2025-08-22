@@ -21,13 +21,11 @@ driver.get("https://libecity.com/signin") #getメソッド+（）開きたいペ
 wait = WebDriverWait(driver, 10) #ページが開くまで10秒待機
 
 # メールアドレスの自動入力
-wait.until(EC.visibility_of_element_located((By.XPATH, '//input[@placeholder="メールアドレス"]')))
-mail_element = driver.find_element(By.XPATH, '//input[@placeholder="メールアドレス"]')
-mail_element.send_keys(login_addles)
+mail_element = wait.until(EC.visibility_of_element_located((By.XPATH, '//input[@placeholder="メールアドレス"]'))) #メールアドレスの入力欄がブラウザに表示されるのを待つ、かつ、表示されたブラウザからplaceholderがメールアドレスである入力欄を探す
+mail_element.send_keys(login_addles) #探した入力欄に環境変数を自動入力する
 
 # パスワードの自動入力
-wait.until(EC.visibility_of_element_located((By.XPATH, '//input[@placeholder="パスワード"]'))) #ある要素が表示されるまで待機
-pass_element = driver.find_element(By.XPATH, '//input[@placeholder="パスワード"]') # 要素を指定して変数に代入
+pass_element = wait.until(EC.visibility_of_element_located((By.XPATH, '//input[@placeholder="パスワード"]'))) # 指定した要素が表示されるまで待機、かつ、要素を指定して変数に代入
 pass_element.send_keys(login_password)
 
 # ログインボタンのクリック
@@ -35,7 +33,10 @@ login_button = driver.find_element(By.CSS_SELECTOR, "#contents_wrap > main > div
 login_button.click()
 
 # ログイン後の確認のための待機時間
-time.sleep(10) #待機時間の設定 ()内の数字で秒数指定
+wait.until(EC.visibility_of_element_located((By.XPATH, '//*[@id="tool_bar"]/div[1]/ul/li[1]/a')))
+
+# ログイン後の画面を目視で確認するための待機時間
+time.sleep(10)
 
 #アプリの終了（直前で設定した待機時間経過後）
 driver.quit()
