@@ -6,7 +6,9 @@ from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 
 class SeleniumDriver:
-    def __init__(self, timeout=10): # WebdriverとWebdriverWaitを初期化する
+    # WebdriverとWebdriverWaitを初期化する
+    # timeout=10はスクリプトでbrowser = SeleniumDriver()と引数が渡されない場合のデフォルト引数(10秒)を設定
+    def __init__(self, timeout=10): 
         #1 新しいChromeブラウザを起動する
         self.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install())) # Cは大文字
         #2 起動したブラウザが表示されるまで最大10秒間待機する
@@ -15,6 +17,7 @@ class SeleniumDriver:
     def open_page(self, url):
         self.driver.get(url) # 指定したURLを開く
     
+    # locatorは探し方の指定(By.XPATH,'//input[@placeholder="メールアドレス"]')
     def input_text(self, locator, text):
         element = self.wait.until(EC.visibility_of_element_located(locator)) # 要素が表示されるのを待ってからテキストを入力する
         element.send_keys(text) # 指定したキーを送信する

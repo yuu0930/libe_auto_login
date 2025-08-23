@@ -5,18 +5,22 @@ import os                                   # OS(オペレーティングシス�
 from selenium_driver import SeleniumDriver  # 作成したselenium_driver.pyをインポートする
 
 # .envファイル（環境変数）の読み込み
-load_dotenv()                               # os.getenv=指定された名前の環境変数の値を取得する
+load_dotenv()
 
 # os.getenvで指定した名前の環境変数の値を取得
 LOGIN_ADDLES = os.getenv("LOGIN_ADDLES")
 LOGIN_PASSWORD = os.getenv("LOGIN_PASSWORD")
 
 # 定数定義(プログラム中に変更しない値)
-BASE_URL = "https://libecity.com/signin"                                  # この部分はプログラムの実行中に値が変わることが意図されていないもの
-MAIL_INPUT_LOCATOR = (By.XPATH, '//input[@placeholder="メールアドレス"]')  # pythonでは「定数」として扱われる
-PASS_INPUT_LOCATOR = (By.XPATH, '//input[@placeholder="パスワード"]')      # pythonの定数は全て大文字のスネークケースで命名する
+# 定数は全て大文字のスネークケースで命名する
+# 定数で書くことで可読性を向上させ、意図しない変更を防ぐ
+# ロケーターは「探し方(ID,XPATH等)、探す値(IDの値等)」のタプルで定義
+BASE_URL = "https://libecity.com/signin" 
+MAIL_INPUT_LOCATOR = (By.XPATH, '//input[@placeholder="メールアドレス"]') 
+PASS_INPUT_LOCATOR = (By.XPATH, '//input[@placeholder="パスワード"]') 
 LOGIN_BUTTON_LOCATOR = (By.CSS_SELECTOR, "#contents_wrap > main > div.login_tab_box.is_show > section > p.form_data_area.text-center > button")
-HOME_BUTTON_LOCATOR = (By.XPATH, '//*[@id="tool_bar"]/div[1]/ul/li[1]/a') # 大文字で書くことで可読性を向上させ、定数と示すことで意図しない変更を防ぐ
+# text()は要素に含まれているテキストしか探すことができない、.(ドット)は子孫要素内のテキストも探すことができる
+HOME_BUTTON_LOCATOR = (By.XPATH, '//a[contains(., "ホーム")]') 
 
 # メインの処理
 def main():
